@@ -1,10 +1,12 @@
-var server = require('http').createServer();
-var io = require('socket.io')(server);
-io.on('connection', function(socket){
-  socket.on('event', function(data){});
-  socket.on('disconnect', function(){});
+var app = require('express').createServer()
+var io = require('socket.io').listen(app);
+
+app.listen(8080);
+
+// routing
+app.get('/', function (req, res) {
+  res.sendfile(__dirname + '/index.html');
 });
-server.listen(8080);
 
 // usernames which are currently connected to the chat
 var usernames = {};
@@ -32,7 +34,7 @@ io.sockets.on('connection', function (socket) {
 		// echo to room 1 that a person has connected to their room
 		socket.broadcast.to('Random').emit('updatechat', 'SERVER', username + ' has connected to this room');
 		socket.emit('updaterooms', rooms, 'Random');
-		io.sockets.in(socket.room).socket.emit('updateusers', usernames);
+		socket.emit('updateusers', usernames);
 	});
 
 
