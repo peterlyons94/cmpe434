@@ -12,12 +12,10 @@ app.get('/', function (req, res) {
 });
 
 // usernames which are currently connected to the chat
-var usernames = {};
-var passwords = {};
+var users = [];
 
 // rooms which are currently available in chat
 var rooms = ['Random'];
-
 io.sockets.on('connection', function (socket) {
 
 	// when the client emits 'adduser', this listens and executes
@@ -27,9 +25,14 @@ io.sockets.on('connection', function (socket) {
 		socket.password = password;
 		// store the room name in the socket session for this client
 		socket.room = 'Random';
-		// add the client's username to the global list
-		usernames[username] = username;
-		passwords[password] = password;
+		// add the client's user details to a user object
+		var user = [];
+		user.username = username;
+		user.room = socket.room;
+		user.password = password;
+		//add the user object to the global list
+		users.push(user);
+
 		// send client to room 1
 		socket.join('Random');
 		// echo to client they've connected
@@ -37,7 +40,9 @@ io.sockets.on('connection', function (socket) {
 		// echo to room 1 that a person has connected to their room
 		socket.broadcast.to('Random').emit('updatechat', 'SERVER', username + ' has connected to this room');
 		socket.emit('updaterooms', rooms, 'Random');
-		socket.emit('updateusers', usernames);
+		// list the users in the room
+		io.sockets.emit('updateusers', users, socket.room);
+		console.log(users);
 	});
 
 
@@ -49,7 +54,13 @@ io.sockets.on('connection', function (socket) {
 	
 	// Sending a message to specific users
 	socket.on('specificchat', function(data, userlist){
-		io.sockets.in(socket.room).to(userlist).emit('updatechat', socket.username, data);
+		for(var obj in users){
+			for(var i in userlist){
+				if(users[obj].username == i){
+					io.sockets.in(socket.room).to(i).emit('updatechat', socket.username, data);
+				}
+			}
+		}
 	});
 
 	// When the user switches rooms
@@ -63,17 +74,34 @@ io.sockets.on('connection', function (socket) {
 		socket.broadcast.to(socket.room).emit('updatechat', 'SERVER', socket.username+' has left this room');
 		// update socket session room title
 		socket.room = newroom;
+		// update users room
+		for(var obj in users){
+			if(users[obj].username == socket.username){ 
+				users[obj].room = socket.room;
+			}
+		}
 		socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' has joined this room');
 		socket.emit('updaterooms', rooms, newroom);
-		socket.emit('updateusers', usernames);
+		io.sockets.emit('updateusers', users, newroom);
+		console.log(users);
 	});
 
 	// when the user disconnects.. perform this
 	socket.on('disconnect', function(){
 		// remove the username from global usernames list
-		delete usernames[socket.username];
+		var i = 0;
+		for(var obj in users){
+			if(users[obj].username == socket.username){ 
+				var index = i;
+				//console.log(index);
+				if (index > -1) {
+			    	users.splice(index, 1);
+				}
+			}
+			i++;
+		}
 		// update list of users in chat, client-side
-		io.sockets.emit('updateusers', usernames);
+		io.sockets.emit('updateusers', users);
 		// echo globally that this client has left
 		socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
 		socket.leave(socket.room);
@@ -90,9 +118,15 @@ io.sockets.on('connection', function (socket) {
 		socket.broadcast.to(socket.room).emit('updatechat', 'SERVER', socket.username+' has left this room');
 		// update socket session room title
 		socket.room = newroom;
+		// update users room
+		for(var obj in users){
+			if(users[obj].username == socket.username){ 
+				users[obj].room = socket.room;
+			}
+		}
 		socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' has joined this room');
 		socket.emit('updaterooms', rooms, newroom);
-		socket.emit('updateusers', usernames);
+		socket.emit('updateusers', users, newroom);
 	});
 
 	// when the user deletes a chatroom

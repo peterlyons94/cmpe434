@@ -1,6 +1,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
 <script>
+	//var socket = io.connect('http://192.168.140.129:8080/');
 	var socket = io.connect('http://159.203.10.248:8080/');
 
 	// on connection to server, ask for user's name with an anonymous callback
@@ -13,7 +14,7 @@
 
 	// listener, whenever the server emits 'updatechat', this updates the chat body
 	socket.on('updatechat', function (username, data) {
-		$('#conversation').append('<b>'+username + ':</b> ' + data + '<br>');
+		$('#conversation').append('<b>'+ username + ':</b> ' + data + '<br>');
 	});
 
 	// listener, whenever the server emits 'updaterooms', this updates the room the client is in
@@ -30,13 +31,18 @@
 	});
 	
 	// listener that shows the current list of users in the chat
-	socket.on('updateusers', function(usernames){
+	socket.on('updateusers', function(users, current_room){
+		console.log("call me maybe");
 		$('#users').empty();
-		$.each(usernames, function(key, value){
-			$('#users').append('<div>' + value + '</div>');
-		});
-	});	
-
+		for(var obj in users){
+			if(users[obj].room == current_room){
+				console.log(users[obj]);
+				$('#users').append('<input type="checkbox" name="users" value="' + users[obj].username + '">' + users[obj].username +'<br>');
+			}
+		}
+		$('#users').append('<input type="reset"><input type="submit" value="Send To">');	
+	});
+	
 	// switch rooms	
 	function switchRoom(room){
 		socket.emit('switchRoom', room);
@@ -49,6 +55,24 @@
 	
 	function listUser(username){
 		socket.emit('listusers', username);
+	}
+
+	// gets the users for the send to specific users
+	function getCheckboxValues(form){
+		var values = [];
+		var selectnames = form.users;
+
+		for (var i=0, iLen=selectnames.length; i<iLen; i++) {
+			if (selectnames[i].checked) {
+				values.push(selectnames[i].value);
+			}
+		}
+		// Do something with values
+		//alert("Vehicles: " + values.join(', '));
+		var message = $('#data').val();
+		$('#data').val('');
+		socket.emit('specificchat', values, message);
+		//return values;
 	}
 	
 	// on load of page
@@ -80,12 +104,6 @@
 			var oldroom = socket.room;
 			socket.emit('deleteRoom', oldroom);
 		});
-		/*
-		// send to specific user
-		$('#sendto').click(function(){
-			var userlist = 
-		});
-*/
 
 	});
 
@@ -108,5 +126,7 @@
 
 <div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
 	<b>USERS</b>
-	<div id="users"></div>
+	<form id="users" onsubmit="getCheckboxValues(this); return false;">
+		<input type="reset"> <input type="submit" value="Send To">
+	</form>
 </div>	
