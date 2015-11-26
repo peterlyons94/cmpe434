@@ -1,7 +1,7 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
 <script>
-	var socket = io.connect('http://159.203.10.248:8080');
+	var socket = io.connect('http://159.203.10.248:8080/');
 
 	// on connection to server, ask for user's name with an anonymous callback
 	socket.on('connect', function(){
@@ -80,11 +80,12 @@
 			var oldroom = socket.room;
 			socket.emit('deleteRoom', oldroom);
 		});
-		
+		/*
 		// send to specific user
 		$('#sendto').click(function(){
 			var userlist = 
 		});
+*/
 
 	});
 
