@@ -30,6 +30,7 @@ io.sockets.on('connection', function (socket) {
 		user.username = username;
 		user.room = socket.room;
 		user.password = password;
+		user.id = socket.id;
 		//add the user object to the global list
 		users.push(user);
 
@@ -41,7 +42,15 @@ io.sockets.on('connection', function (socket) {
 		socket.broadcast.to('Random').emit('updatechat', 'SERVER', username + ' has connected to this room');
 		socket.emit('updaterooms', rooms, 'Random');
 		// list the users in the room
-		io.sockets.emit('updateusers', users, socket.room);
+		// update users room
+		var inroom = [];
+		for(var obj in users){
+			if(users[obj].room == socket.room){
+				inroom.push(users[obj].username);
+			}
+		}
+
+		io.sockets.emit('updateusers', inroom, socket.room);
 		console.log(users);
 	});
 
@@ -53,13 +62,16 @@ io.sockets.on('connection', function (socket) {
 	});
 	
 	// Sending a message to specific users
-	socket.on('specificchat', function(data, userlist){
-		for(var obj in users){
-			for(var i in userlist){
-				if(users[obj].username == i){
-					io.sockets.in(socket.room).to(i).emit('updatechat', socket.username, data);
+	socket.on('specificchat', function(userlist, data){
+		console.log(data);
+		console.log(userlist);
+		for(var i in userlist){
+			for(var j in users){
+				if(users[j].username == userlist[i]){
+					socket.broadcast.to(users[j].id).emit('updatechat', socket.username, data);
 				}
 			}
+			
 		}
 	});
 
@@ -75,14 +87,18 @@ io.sockets.on('connection', function (socket) {
 		// update socket session room title
 		socket.room = newroom;
 		// update users room
+		var inroom = [];
 		for(var obj in users){
 			if(users[obj].username == socket.username){ 
 				users[obj].room = socket.room;
 			}
+			if(users[obj].room == socket.room){
+				inroom.push(users[obj].username);
+			}
 		}
 		socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' has joined this room');
 		socket.emit('updaterooms', rooms, newroom);
-		io.sockets.emit('updateusers', users, newroom);
+		io.sockets.emit('updateusers', inroom, newroom);
 		console.log(users);
 	});
 
@@ -119,14 +135,18 @@ io.sockets.on('connection', function (socket) {
 		// update socket session room title
 		socket.room = newroom;
 		// update users room
+		var inroom = [];
 		for(var obj in users){
 			if(users[obj].username == socket.username){ 
 				users[obj].room = socket.room;
 			}
+			if(users[obj].room == socket.room){
+				inroom.push(users[obj].username);
+			}
 		}
 		socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' has joined this room');
 		socket.emit('updaterooms', rooms, newroom);
-		socket.emit('updateusers', users, newroom);
+		socket.emit('updateusers', inroom, newroom);
 	});
 
 	// when the user deletes a chatroom
