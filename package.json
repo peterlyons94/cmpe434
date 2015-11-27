@@ -1,5 +1,5 @@
 {
-     "name": "mukhin_chat",
+     "name": "cmpe434-chat",
      "description": "socket.io chatroom",
      "version": "0.0.1",
      "dependencies": {
