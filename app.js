@@ -75,6 +75,18 @@ io.sockets.on('connection', function (socket) {
 		}
 	});
 
+		// Sending a message to specific users
+	socket.on('specificAppChat', function(user, data){
+		console.log(data);
+		console.log(user);
+		for(var j in users){
+			if(users[j].username == user){
+				socket.broadcast.to(users[j].id).emit('updatechat', socket.username, data);
+			}
+		}
+			
+	});
+
 	// When the user switches rooms
 	socket.on('switchRoom', function(newroom){
 		// leave the current room (stored in session)
