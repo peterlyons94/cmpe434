@@ -57,8 +57,17 @@ io.sockets.on('connection', function (socket) {
 
 	// when the client emits 'sendchat', this listens and executes
 	socket.on('sendchat', function (data) {
-		// we tell the client to execute 'updatechat' with 2 parameters
-		io.sockets.in(socket.room).emit('updatechat', socket.username, data);
+		//check to see if the user sends the ./help first
+		if(data.indexOf("./help") > -1 || data.indexOf("./h") > -1){
+			console.log(socket.id);
+			console.log(socket.username);	
+			socket.broadcast.to(socket.id).emit('updatechat', 'HELP',
+				"This is a help function, only you can see it.");
+		} else{
+			// we tell the client to execute 'updatechat' with 2 parameters
+			io.sockets.in(socket.room).emit('updatechat', socket.username, data);
+		}
+
 	});
 	
 	// Sending a message to specific users
@@ -163,19 +172,43 @@ io.sockets.on('connection', function (socket) {
 
 	// when the user deletes a chatroom
 	socket.on('deleteRoom', function(room){
-		if(room != 'Random'){
+		// check to make sure you're only one in room
+		var inroom = [];
+		for(var obj in users){
+			if(users[obj].username == socket.username){ 
+				users[obj].room = socket.room;
+			}			
+			if(users[obj].room == socket.room){
+				inroom.push(users[obj].username);
+			}
+		}
+		console.log(socket.room);
+		console.log(inroom);
+		// if the room is not random
+		var roomin = socket.room;
+		if(roomin == 'Random' || inroom.length > 1){
+			socket.broadcast.to(socket.room).emit('updatechat','SERVER', "You can't delete this room");
+		} else{
+			//console.log(roomin);
 			socket.leave(room);
-			socket.emit('updatechat', 'SERVER', 'You have deleted ' + room);
+			socket.emit('updatechat', 'SERVER', 'You have deleted ' + roomin);
 			var index = rooms.indexOf(socket.room);
 			if (index > -1) {
 			    rooms.splice(index, 1);
 			}
-
 			socket.join('Random');
+			// update users room
+			socket.room = 'Random';
+			for(var obj in users){
+				if(users[obj].username == socket.username){ 
+					users[obj].room = socket.room;
+				}		
+				if(users[obj].room == socket.room){
+					inroom.push(users[obj].username);
+				}
+			}	
 			io.sockets.emit('updaterooms', rooms, 'Random');
 			socket.emit('updatechat', 'SERVER', 'You have now joined ' + socket.room);
-		} else {
-			socket.broadcast.to(socket.room).emit('updatechat','SERVER', "You can't delete this room");
 		}
 	});
 	
