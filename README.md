@@ -29,7 +29,11 @@
 
 <h3>Android Client Install Instructions </h3>
 
+1. Open Android Studio and select import project
+2. Navigate to where the ``` android_client ``` is stored and select the project
+3. Ensure that Intel Virtualization technology is enabled. If it not, find a tutorial online.
+4. Make sure that the correct IP address is listed in the constants file.
+5. Run emulator & enjoy.
 
 
-
-Project done by: Peter Lyons, Hannah Iacono.
+Project by: Peter Lyons, Hannah Iacono.
