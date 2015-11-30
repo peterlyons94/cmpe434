@@ -158,7 +158,10 @@ io.sockets.on('connection', function (socket) {
 			console.log(socket.username);	
 			socket.emit('updatechat', 'HELP',
 				"This is a help function, only you can see it.");
-		} else{
+		} else if(data.indexOf("~meow~") > -1 || data.indexOf(":meow:") > -1){
+			io.sockets.in(socket.room).emit('updatechat', 'CAT LORD', "=^.^=");
+		}
+		else{
 			// we tell the client to execute 'updatechat' with 2 parameters
 			io.sockets.in(socket.room).emit('updatechat', socket.username, data);
 		}
