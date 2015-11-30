@@ -341,7 +341,6 @@ io.sockets.on('connection', function (socket) {
 		if(roomin == 'Random' || inroom.length > 1){
 			socket.broadcast.to(socket.room).emit('updatechat','SERVER', "You can't delete this room");
 		} else{
-			//console.log(roomin);
 			socket.leave(room);
 			socket.emit('updatechat', 'SERVER', 'You have deleted ' + roomin);
 			var index = rooms.indexOf(socket.room);
@@ -351,6 +350,7 @@ io.sockets.on('connection', function (socket) {
 			socket.join('Random');
 			// update users room
 			socket.room = 'Random';
+			inroom = [];
 			for(var obj in users){
 				if(users[obj].username == socket.username){ 
 					users[obj].room = socket.room;
@@ -362,6 +362,7 @@ io.sockets.on('connection', function (socket) {
 			}	
 			socket.emit('updaterooms', rooms, 'Random');
 			socket.emit('updatechat', 'SERVER', 'You have now joined ' + socket.room);
+			socket.emit('updateusers', inroom, newroom);
 		}
 	});
 });
