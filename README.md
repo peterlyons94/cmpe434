@@ -27,7 +27,7 @@
 6. Help function by typing "./h or ./help"
 
 
-<h3>Android Client Install Instructions </h3>
+<h3>Android Client Install Instructions: </h3>
 
 1. Open Android Studio and select import project
 2. Navigate to where the ``` android_client ``` is stored and select the project
