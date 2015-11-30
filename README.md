@@ -4,10 +4,13 @@
 
 1. Clone repository into a folder on a Linux machine. 
 2. Run the following commands inside the folder
-	- '''sudo apt-get install npm'''
-	- '''sudo apt-get install nodejs-legacy'''
-	- '''npm install .'''
-	- '''node app.js '''
+	
+	```
+	sudo apt-get install npm
+	sudo apt-get install nodejs-legacy
+	npm install .
+	node app.js
+	```
 
 3. The server should be up and running. Make sure in the index.html file, or within the android app that the correct IP address is listed. For demonstration purposes it has been pointed towards a host on DigitalOcean, but for localized testing please change the addresses in both the index.html file and in the anroid client to localhost:8080.
 
