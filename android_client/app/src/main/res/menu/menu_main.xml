@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context=".MainActivity">
+    <item android:id="@+id/action_onlineusers"
+        android:title="Online Users"
+        android:orderInCategory="100"
+        app:showAsAction="never"/>
+      <item android:id="@+id/action_rooms"
+          android:title="Change Chatroom"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+      <item android:id="@+id/action_addroom"
+          android:title="Create a Chatroom"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+    <item android:id="@+id/action_deleteroom"
+        android:title="Delete Chatroom"
+        android:orderInCategory="100"
+        app:showAsAction="never"/>
+</menu>
