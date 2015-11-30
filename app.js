@@ -71,15 +71,15 @@ io.sockets.on('connection', function (socket) {
 		else{
 			var flag = false;
 			var index = -1;
-			for(g in globalusers){
-				// if they already online
-				if(users.length > 0 ){
-					for(h in users){
-						if(users[h].username == userattempt){	// username already online
-							flag = true;
-						} 
-					}
+			// if they already online
+			if(users.length > 0 ){
+				for(h in users){
+					if(users[h].username == userattempt){	// username already online
+						flag = true;
+					} 
 				}
+			}
+			for(g in globalusers){
 				else if(globalusers[g].username == userattempt && globalusers[g].password == pwattempt){	// username exists, but not online
 					index = g;
 				}
@@ -112,15 +112,17 @@ io.sockets.on('connection', function (socket) {
 		else{
 			var flag = false;
 			var index = -1;
-			for(g in globalusers){
-				// if they already online
-				if(users.length > 0 ){
-					for(h in users){
-						if(users[h].username == userattempt){	// username already online
-							flag = true;
-						} 
-					}
+			var success = "";
+
+			// iterate through global userlists
+			if(users.length > 0 ){
+				for(h in users){
+					if(users[h].username == userattempt){	// username already online
+						flag = true;
+					} 
 				}
+			}
+			for(g in globalusers){
 				else if(globalusers[g].username == userattempt && globalusers[g].password == pwattempt){	// username exists, but not online
 					index = g;
 				}
@@ -129,10 +131,9 @@ io.sockets.on('connection', function (socket) {
 				}
 			}
 			// check to see the instruction
-			var success = "";
 			if(flag == true){
 				success = "false";
-				socket.emit('onlogin', success);
+				socket.emit('onlogin', success); // failed login
 			}else{
 				if(index > -1){
 					adduser(globalusers[g].username, globalusers[g].password);
@@ -146,6 +147,7 @@ io.sockets.on('connection', function (socket) {
 		}
 	});
 
+	// the add user function called once the entered credentials have been validated
 	function adduser(username, password){
 		// store the username in the socket session for this client
 		socket.username = username;
@@ -210,10 +212,9 @@ io.sockets.on('connection', function (socket) {
 			// we tell the client to execute 'updatechat' with 2 parameters
 			io.sockets.in(socket.room).emit('updatechat', socket.username, data);
 		}
-
 	});
 	
-	// Sending a message to specific users
+	// Sending a message to specific users on the website
 	socket.on('specificchat', function(userlist, data){
 		console.log(data);
 		console.log(userlist);
@@ -223,11 +224,10 @@ io.sockets.on('connection', function (socket) {
 					socket.broadcast.to(users[j].id).emit('updatechat', socket.username, data);
 				}
 			}
-			
 		}
 	});
 
-		// Sending a message to specific users
+	// Sending a message to specific users using the Android application
 	socket.on('specificAppChat', function(user, data){
 		console.log(data);
 		console.log(user);
@@ -235,8 +235,7 @@ io.sockets.on('connection', function (socket) {
 			if(users[j].username == user){
 				socket.broadcast.to(users[j].id).emit('updatechat', socket.username, data);
 			}
-		}
-			
+		}		
 	});
 
 	// When the user switches rooms
