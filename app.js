@@ -13,34 +13,40 @@ app.get('/', function (req, res) {
 
 // usernames which are currently connected to the chat
 var users = [];
+var globalusers = [];
 
 // rooms which are currently available in chat
 var rooms = ['Random'];
 io.sockets.on('connection', function (socket) {
-
-	// when the client emits 'adduser', this listens and executes
+	
+	/*	// when the client emits 'adduser', this listens and executes
 	socket.on('adduser', function(username, password){
 		// store the username in the socket session for this client
 		socket.username = username;
-		socket.password = password;
-		// store the room name in the socket session for this client
+		socket.password = password;		
 		socket.room = 'Random';
+
 		// add the client's user details to a user object
 		var user = [];
 		user.username = username;
 		user.room = socket.room;
 		user.password = password;
 		user.id = socket.id;
+
 		//add the user object to the global list
 		users.push(user);
+		globalusers.push(user);
 
 		// send client to room 1
 		socket.join('Random');
+
 		// echo to client they've connected
 		socket.emit('updatechat', 'SERVER', 'you have connected to Random');
+
 		// echo to room 1 that a person has connected to their room
 		socket.broadcast.to('Random').emit('updatechat', 'SERVER', username + ' has connected to this room');
 		socket.emit('updaterooms', rooms, 'Random');
+		
 		// list the users in the room
 		// update users room
 		var inroom = [];
@@ -49,11 +55,100 @@ io.sockets.on('connection', function (socket) {
 				inroom.push(users[obj].username);
 			}
 		}
-
 		io.sockets.emit('updateusers', inroom, socket.room);
 		console.log(users);
+	});*/
+
+	socket.on('login', function(userattempt, pwattempt){
+		
+		// First user
+		if(globalusers.length == 0){
+			// anyone else
+			socket.username = userattempt;
+			socket.password = pwattempt;
+			adduser(userattempt, pwattempt);
+		} 
+		else{
+			var flag = false;
+			var index = -1;
+			for(g in globalusers){
+				// if they already online
+				if(users.length > 0 ){
+					for(h in users){
+						if(users[h].username == userattempt){	// username already online
+							flag = true;
+						} 
+					}
+				}
+				else if(globalusers[g].username == userattempt && globalusers[g].password == pwattempt){	// username exists, but not online
+					index = g;
+				}
+				else if(globalusers[g].username == userattempt){ // same username, but not pw
+					flag = true;
+				}
+			}
+			// check to see the instruction
+			if(flag == true){
+				socket.emit('retry');
+			}else{
+				if(index > -1){
+					adduser(globalusers[g].username, globalusers[g].password);
+					socket.emit('updatechat', 'SERVER', "Welcome back");
+				}else{
+					adduser(userattempt, pwattempt);
+				}
+			}
+		}
 	});
 
+	function adduser(username, password){
+		// store the username in the socket session for this client
+		socket.username = username;
+		socket.password = password;		
+		socket.room = 'Random';
+
+		// add the client's user details to a user object
+		var user = [];
+		user.username = username;
+		user.room = socket.room;
+		user.password = password;
+		user.id = socket.id;
+
+		//add the user object to the global list
+		users.push(user);
+
+		// should probably cheeck to see if user exisats already on global list
+		var flag = false;
+		for(n in globalusers){
+			if(globalusers[g] == username){
+				flag = true;
+			}
+		}
+		if(flag == false){
+			globalusers.push(user);
+		}
+
+		// send client to room 1
+		socket.join('Random');
+
+		// echo to client they've connected
+		socket.emit('updatechat', 'SERVER', 'you have connected to Random');
+
+		// echo to room 1 that a person has connected to their room
+		socket.broadcast.to('Random').emit('updatechat', 'SERVER', username + ' has connected to this room');
+		socket.emit('updaterooms', rooms, 'Random');
+		
+		// list the users in the room
+		// update users room
+		var inroom = [];
+		for(var obj in users){
+			if(users[obj].room == socket.room){
+				inroom.push(users[obj].username);
+			}
+		}
+		io.sockets.emit('updateusers', inroom, socket.room);
+		console.log(users);
+	}
 
 	// when the client emits 'sendchat', this listens and executes
 	socket.on('sendchat', function (data) {
@@ -61,7 +156,7 @@ io.sockets.on('connection', function (socket) {
 		if(data.indexOf("./help") > -1 || data.indexOf("./h") > -1){
 			console.log(socket.id);
 			console.log(socket.username);	
-			socket.broadcast.to(socket.id).emit('updatechat', 'HELP',
+			socket.emit('updatechat', 'HELP',
 				"This is a help function, only you can see it.");
 		} else{
 			// we tell the client to execute 'updatechat' with 2 parameters
@@ -166,6 +261,9 @@ io.sockets.on('connection', function (socket) {
 			}
 		}
 		socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' has joined this room');
+		for(k in users){
+			socket.broadcast.to(users[k].id).emit('updaterooms', rooms, users[k].room);
+		}
 		socket.emit('updaterooms', rooms, newroom);
 		socket.emit('updateusers', inroom, newroom);
 	});
@@ -206,36 +304,10 @@ io.sockets.on('connection', function (socket) {
 				if(users[obj].room == socket.room){
 					inroom.push(users[obj].username);
 				}
+				socket.broadcast.to(users[obj].id).emit('updaterooms', rooms, users[obj].room);
 			}	
-			io.sockets.emit('updaterooms', rooms, 'Random');
+			socket.emit('updaterooms', rooms, 'Random');
 			socket.emit('updatechat', 'SERVER', 'You have now joined ' + socket.room);
 		}
 	});
-	
-	/*
-	var attempt = 3; // Variable to count number of attempts.
-	// Below function Executes on click of login button.
-	
-	function validate(){
-		var username = document.getElementById("username").value;
-		var password = document.getElementById("password").value;
-		if ( username == "Formget" && password == "formget#123"){
-			alert ("Login successfully");
-			window.location = "index.html"; // Redirecting to other page.
-			return false;
-		} else{
-			attempt --;// Decrementing by one.
-			alert("You have left "+attempt+" attempt;");
-			// Disabling fields after 3 attempts.
-			if( attempt == 0){
-				document.getElementById("username").disabled = true;
-				document.getElementById("password").disabled = true;
-				document.getElementById("submit").disabled = true;
-				return false;
-			}
-		}
-	}
-
-	*/
-
 });

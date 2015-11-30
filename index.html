@@ -1,15 +1,23 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
 <script>
-	var socket = io.connect('http://192.168.140.129:8080/');
-	//var socket = io.connect('http://159.203.10.248:8080/');
+	//var socket = io.connect('http://192.168.140.129:8080/');
+	var socket = io.connect('http://159.203.10.248:8080/');
 
 	// on connection to server, ask for user's name with an anonymous callback
 	socket.on('connect', function(){
 		// call the server-side function 'adduser' and send one parameter (value of prompt)
-		var user = prompt("What is your username?");
-		var pwd = prompt("Enter Password");
-		socket.emit('adduser', user, pwd);	
+		var userattempt = prompt("What is your username?");
+		var pwattempt = prompt("Enter Password");
+		socket.emit('login', userattempt, pwattempt);	
+
+	});
+
+	socket.on('retry', function(){
+		alert("Sorry that username is already taken. Please try again.");
+		var userattempt = prompt("What is your username?");
+		var pwattempt = prompt("Enter Password");
+		socket.emit('login', userattempt, pwattempt);	
 	});
 
 	// listener, whenever the server emits 'updatechat', this updates the chat body
@@ -39,6 +47,7 @@
 		$('#users').append('<input type="reset"><input type="submit" value="Send To">');	
 	});
 	
+
 	// switch rooms	
 	function switchRoom(room){
 		socket.emit('switchRoom', room);
@@ -49,6 +58,11 @@
 		socket.emit('newRoom', newroom);
 	}
 	
+	// add user
+	function adduser(username, password){
+		socket.emit('adduser', username, password);
+	}
+
 	function listUser(username){
 		socket.emit('listusers', username);
 	}
@@ -68,7 +82,7 @@
 		var message = $('#data').val();
 		$('#data').val('');
 		socket.emit('specificchat', values, message);
-		//return values;
+		//empty values;
 		values = [];
 	}
 	
@@ -126,5 +140,4 @@
 	<form id="users" onsubmit="getCheckboxValues(this); return false;">
 		<input type="reset"> <input type="submit" value="Send To">
 	</form>
-	<div id="fuck"></div>
 </div>	
