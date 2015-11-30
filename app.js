@@ -80,7 +80,7 @@ io.sockets.on('connection', function (socket) {
 				}
 			}
 			for(g in globalusers){
-				else if(globalusers[g].username == userattempt && globalusers[g].password == pwattempt){	// username exists, but not online
+				if(globalusers[g].username == userattempt && globalusers[g].password == pwattempt){	// username exists, but not online
 					index = g;
 				}
 				else if(globalusers[g].username == userattempt){ // same username, but not pw
@@ -123,7 +123,7 @@ io.sockets.on('connection', function (socket) {
 				}
 			}
 			for(g in globalusers){
-				else if(globalusers[g].username == userattempt && globalusers[g].password == pwattempt){	// username exists, but not online
+				if(globalusers[g].username == userattempt && globalusers[g].password == pwattempt){	// username exists, but not online
 					index = g;
 				}
 				else if(globalusers[g].username == userattempt){ // same username, but not pw
