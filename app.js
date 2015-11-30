@@ -140,6 +140,7 @@ io.sockets.on('connection', function (socket) {
 				}else{
 					adduser(userattempt, pwattempt);
 				}
+				success = "true";
 				socket.emit('onlogin', success);
 			}
 		}
