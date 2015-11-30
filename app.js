@@ -101,6 +101,50 @@ io.sockets.on('connection', function (socket) {
 		}
 	});
 
+	socket.on('androidlogin', function(userattempt, pwattempt){
+		// First user
+		if(globalusers.length == 0){
+			// anyone else
+			socket.username = userattempt;
+			socket.password = pwattempt;
+			adduser(userattempt, pwattempt);
+		} 
+		else{
+			var flag = false;
+			var index = -1;
+			for(g in globalusers){
+				// if they already online
+				if(users.length > 0 ){
+					for(h in users){
+						if(users[h].username == userattempt){	// username already online
+							flag = true;
+						} 
+					}
+				}
+				else if(globalusers[g].username == userattempt && globalusers[g].password == pwattempt){	// username exists, but not online
+					index = g;
+				}
+				else if(globalusers[g].username == userattempt){ // same username, but not pw
+					flag = true;
+				}
+			}
+			// check to see the instruction
+			var success = "";
+			if(flag == true){
+				success = "false";
+				socket.emit('onlogin', success);
+			}else{
+				if(index > -1){
+					adduser(globalusers[g].username, globalusers[g].password);
+					socket.emit('updatechat', 'SERVER', "Welcome back");
+				}else{
+					adduser(userattempt, pwattempt);
+				}
+				socket.emit('onlogin', success);
+			}
+		}
+	});
+
 	function adduser(username, password){
 		// store the username in the socket session for this client
 		socket.username = username;
@@ -244,6 +288,12 @@ io.sockets.on('connection', function (socket) {
 
 	// when the user creates a new room
 	socket.on('newRoom', function(newroom){
+		// check if room exists
+		for(p in rooms){
+			if(rooms[p].indexOf(newroom) > -1){
+				newroom = newroom + ".1";
+			}
+		}
 		// add room to global list
 		rooms.push(newroom);
 		socket.leave(socket.room);
