@@ -281,7 +281,13 @@ io.sockets.on('connection', function (socket) {
 			i++;
 		}
 		// update list of users in chat, client-side
-		io.sockets.emit('updateusers', users);
+		var inroom = [];
+		for(var obj in users){
+			if(users[obj].room == socket.room){
+				inroom.push(users[obj].username);
+			}
+		}
+		io.sockets.emit('updateusers', inroom, users);
 		// echo globally that this client has left
 		socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
 		socket.leave(socket.room);
@@ -350,6 +356,7 @@ io.sockets.on('connection', function (socket) {
 			socket.join('Random');
 			// update users room
 			socket.room = 'Random';
+			var newroom = socket.room;
 			inroom = [];
 			for(var obj in users){
 				if(users[obj].username == socket.username){ 
@@ -361,7 +368,7 @@ io.sockets.on('connection', function (socket) {
 				socket.broadcast.to(users[obj].id).emit('updaterooms', rooms, users[obj].room);
 			}	
 			socket.emit('updaterooms', rooms, 'Random');
-			socket.emit('updateusers', inroom, 'Random');
+			socket.emit('updateusers', inroom, newroom);
 			socket.emit('updatechat', 'SERVER', 'You have now joined ' + socket.room);
 		}
 	});
