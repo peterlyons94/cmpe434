@@ -204,7 +204,7 @@ io.sockets.on('connection', function (socket) {
 			console.log(socket.id);
 			console.log(socket.username);	
 			socket.emit('updatechat', 'HELP',
-				"This is a help function, only you can see it.");
+				"This is the help command. To send a message to everyone, click SEND ALL, if you would like to send to specific users, click SEND TO.... To see the current online users in the room you're in, to change chatrooms, to create a new chatroom, delete the current chatroom (if you're the only user within that chatroom), or to sign out, go to the menu options.");
 		} else if(data.indexOf("~meow~") > -1 || data.indexOf(":meow:") > -1){
 			io.sockets.in(socket.room).emit('updatechat', 'CAT LORD', "=^.^=");
 		}
