@@ -361,8 +361,8 @@ io.sockets.on('connection', function (socket) {
 				socket.broadcast.to(users[obj].id).emit('updaterooms', rooms, users[obj].room);
 			}	
 			socket.emit('updaterooms', rooms, 'Random');
+			socket.emit('updateusers', inroom, 'Random');
 			socket.emit('updatechat', 'SERVER', 'You have now joined ' + socket.room);
-			socket.emit('updateusers', inroom, newroom);
 		}
 	});
 });
