@@ -396,14 +396,12 @@ io.sockets.on('connection', function (socket) {
 				if(users[i].room == oldroom){
 					socket.broadcast.to(users[i].id).emit('updateusers', inoldroom, oldroom);
 				}
-				else if(users[i].room == newroom){
-					socket.broadcast.to(users[i].id).emit('updateusers', inroom, newroom);
-				}
 			}
 			socket.emit('updaterooms', rooms, 'Random');
+			socket.emit('updateusers', inroom, 'Random');
 			socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' has joined this room');
-			//socket.emit('updateusers', inoldroom, oldroom);
-			socket.emit('updatechat', 'SERVER', 'You have now joined ' + socket.room);
+			//socket.emit('updateusers', inoldroomoldroom);
+			socket.emit('updatechat', 'SERVER', 'ou have now joined ' + socket.room);
 		}
 	});
 });
