@@ -268,8 +268,8 @@ io.sockets.on('connection', function (socket) {
 		}
 		socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' has joined this room');
 		socket.emit('updaterooms', rooms, newroom);
-		io.sockets.emit('updateusers', inroom, newroom);
-		io.sockets.emit('updateusers', inoldroom, oldroom);
+		socket.broadcast.to(newroom).emit('updateusers', inroom, newroom);
+		socket.broadcast.to(oldroom).emit('updateusers', inoldroom, oldroom);
 		console.log(users);
 	});
 
@@ -337,8 +337,8 @@ io.sockets.on('connection', function (socket) {
 			socket.broadcast.to(users[k].id).emit('updaterooms', rooms, users[k].room);
 		}
 		socket.emit('updaterooms', rooms, newroom);
-		socket.emit('updateusers', inroom, newroom);
-		io.sockets.emit('updateusers', inoldroom, oldroom);
+		socket.broadcast.to(newroom).emit('updateusers', inroom, newroom);
+		socket.broadcast.to(oldroom).emit('updateusers', inoldroom, oldroom);
 	});
 
 	// when the user deletes a chatroom
@@ -355,6 +355,7 @@ io.sockets.on('connection', function (socket) {
 		}
 		console.log(socket.room);
 		console.log(inroom);
+
 		// if the room is not random
 		var roomin = socket.room;
 		if(roomin == 'Random' || inroom.length > 1){
@@ -373,15 +374,15 @@ io.sockets.on('connection', function (socket) {
 			inroom = [];
 			for(var obj in users){
 				if(users[obj].username == socket.username){ 
-					users[obj].room = socket.room;
+					users[obj].room = newroom;
 				}		
-				if(users[obj].room == socket.room){
+				if(users[obj].room == newroom){
 					inroom.push(users[obj].username);
 				}
 				socket.broadcast.to(users[obj].id).emit('updaterooms', rooms, users[obj].room);
 			}	
 			socket.emit('updaterooms', rooms, 'Random');
-			socket.emit('updateusers', inroom, newroom);
+			socket.emit('updateusers', inroom, 'Random');
 			socket.emit('updatechat', 'SERVER', 'You have now joined ' + socket.room);
 		}
 	});
