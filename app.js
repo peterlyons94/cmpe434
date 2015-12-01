@@ -241,6 +241,7 @@ io.sockets.on('connection', function (socket) {
 	// When the user switches rooms
 	socket.on('switchRoom', function(newroom){
 		// leave the current room (stored in session)
+		var oldroom = socket.room;
 		socket.leave(socket.room);
 		// join new room, received as function parameter
 		socket.join(newroom);
@@ -250,7 +251,9 @@ io.sockets.on('connection', function (socket) {
 		// update socket session room title
 		socket.room = newroom;
 		// update users room
+		var inoldroom = [];
 		var inroom = [];
+
 		for(var obj in users){
 			if(users[obj].username == socket.username){ 
 				users[obj].room = socket.room;
@@ -258,10 +261,15 @@ io.sockets.on('connection', function (socket) {
 			if(users[obj].room == socket.room){
 				inroom.push(users[obj].username);
 			}
+			else if(users[obj].room == oldroom){
+				oldroom.push(users[obj].username);
+			}
+	
 		}
 		socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' has joined this room');
 		socket.emit('updaterooms', rooms, newroom);
 		io.sockets.emit('updateusers', inroom, newroom);
+		io.sockets.emit('updateusers', inoldroom, oldroom);
 		console.log(users);
 	});
 
@@ -302,6 +310,7 @@ io.sockets.on('connection', function (socket) {
 		}
 		// add room to global list
 		rooms.push(newroom);
+		var oldroom = socket.room;
 		socket.leave(socket.room);
 		socket.join(newroom);
 		socket.emit('updatechat', 'SERVER', 'You have created ' + newroom);
@@ -310,6 +319,7 @@ io.sockets.on('connection', function (socket) {
 		// update socket session room title
 		socket.room = newroom;
 		// update users room
+		var inoldroom = [];	
 		var inroom = [];
 		for(var obj in users){
 			if(users[obj].username == socket.username){ 
@@ -318,6 +328,9 @@ io.sockets.on('connection', function (socket) {
 			if(users[obj].room == socket.room){
 				inroom.push(users[obj].username);
 			}
+			else if(users[obj].room == oldroom){
+				oldroom.push(users[obj].username);
+			}
 		}
 		socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' has joined this room');
 		for(k in users){
@@ -325,6 +338,7 @@ io.sockets.on('connection', function (socket) {
 		}
 		socket.emit('updaterooms', rooms, newroom);
 		socket.emit('updateusers', inroom, newroom);
+		io.sockets.emit('updateusers', inoldroom, oldroom);
 	});
 
 	// when the user deletes a chatroom
