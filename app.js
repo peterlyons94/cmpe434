@@ -262,7 +262,7 @@ io.sockets.on('connection', function (socket) {
 				inroom.push(users[obj].username);
 			}
 			else if(users[obj].room == oldroom){
-				oldroom.push(users[obj].username);
+				inoldroom.push(users[obj].username);
 			}
 	
 		}
@@ -329,7 +329,7 @@ io.sockets.on('connection', function (socket) {
 				inroom.push(users[obj].username);
 			}
 			else if(users[obj].room == oldroom){
-				oldroom.push(users[obj].username);
+				inoldroom.push(users[obj].username);
 			}
 		}
 		socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' has joined this room');
