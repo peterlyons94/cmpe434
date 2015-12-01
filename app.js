@@ -268,8 +268,8 @@ io.sockets.on('connection', function (socket) {
 		}
 		socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' has joined this room');
 		socket.emit('updaterooms', rooms, newroom);
-		socket.broadcast.to(newroom).emit('updateusers', inroom, newroom);
-		socket.broadcast.to(oldroom).emit('updateusers', inoldroom, oldroom);
+		socket.emit('updateusers', inroom, newroom);
+		socket.emit('updateusers', inoldroom, oldroom);
 		console.log(users);
 	});
 
@@ -337,8 +337,8 @@ io.sockets.on('connection', function (socket) {
 			socket.broadcast.to(users[k].id).emit('updaterooms', rooms, users[k].room);
 		}
 		socket.emit('updaterooms', rooms, newroom);
-		socket.broadcast.to(newroom).emit('updateusers', inroom, newroom);
-		socket.broadcast.to(oldroom).emit('updateusers', inoldroom, oldroom);
+		socket.emit('updateusers', inroom, newroom);
+		socket.emit('updateusers', inoldroom, oldroom);
 	});
 
 	// when the user deletes a chatroom
@@ -361,6 +361,7 @@ io.sockets.on('connection', function (socket) {
 		if(roomin == 'Random' || inroom.length > 1){
 			socket.broadcast.to(socket.room).emit('updatechat','SERVER', "You can't delete this room");
 		} else{
+			var oldroom = room;
 			socket.leave(room);
 			socket.emit('updatechat', 'SERVER', 'You have deleted ' + roomin);
 			var index = rooms.indexOf(socket.room);
@@ -372,6 +373,7 @@ io.sockets.on('connection', function (socket) {
 			socket.room = 'Random';
 			var newroom = socket.room;
 			inroom = [];
+			var inoldroom = [];
 			for(var obj in users){
 				if(users[obj].username == socket.username){ 
 					users[obj].room = newroom;
@@ -379,10 +381,14 @@ io.sockets.on('connection', function (socket) {
 				if(users[obj].room == newroom){
 					inroom.push(users[obj].username);
 				}
+				else if(users[obj].room == oldroom){
+					inoldroom.push(users[obj].username);
+				}
 				socket.broadcast.to(users[obj].id).emit('updaterooms', rooms, users[obj].room);
 			}	
 			socket.emit('updaterooms', rooms, 'Random');
 			socket.emit('updateusers', inroom, 'Random');
+			socket.emit('updateusers', inoldroom, oldroom);
 			socket.emit('updatechat', 'SERVER', 'You have now joined ' + socket.room);
 		}
 	});
